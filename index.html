@@ -1150,19 +1150,43 @@ main{padding:0; background:var(--surface);}
   var scanStream=null, scanRAF=null, scanCanvas=null, scanCtx=null,
       lastText="", lastTime=0;
 
-  function normCode(s){ return String(s==null?"":s).trim().toLowerCase(); }
+  function normCode(s){
+    s = String(s==null ? "" : s)
+        .replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(c){ return String.fromCharCode(c.charCodeAt(0)-0xFEE0); }) // 全角英数→半角
+        .replace(/[‐‑‒–—―ー−]/g, "-")   // ハイフン類を統一
+        .replace(/\s+/g, "");            // 空白を全除去
+    return s.trim().toLowerCase();
+  }
+
+  // QR文字列を照合候補に分解（カンマ/タブ/セミコロン/縦棒/スペースで区切る＋丸ごとも候補）
+  function codeTokens(text){
+    var raw = String(text==null ? "" : text);
+    var parts = raw.split(/[,\t;| ]+/);
+    parts.push(raw);
+    var seen={}, out=[];
+    for(var i=0;i<parts.length;i++){
+      var t=normCode(parts[i]);
+      if(t && !seen[t]){ seen[t]=1; out.push(t); }
+    }
+    return out;
+  }
 
   function findRowByCode(code){
-    var q=normCode(code);
-    if(!q) return null;
-    var partial=null;
+    var tokens = codeTokens(code);
+    if(!tokens.length) return null;
+    var H = state.headers || [];
+    var partial = null;
     for(var i=0;i<state.rows.length;i++){
-      var r=state.rows[i];
-      var sub=normCode(state.subCol?r[state.subCol]:"");
-      var main=normCode(state.mainCol?r[state.mainCol]:"");
-      if(sub && sub===q) return r;                       // 品番の完全一致を最優先
-      if(!partial && sub && sub.indexOf(q)>=0) partial=r;
-      if(!partial && main && main.indexOf(q)>=0) partial=r;
+      var r = state.rows[i];
+      for(var h=0;h<H.length;h++){         // その行の全列を対象に照合
+        var val = normCode(r[H[h]]);
+        if(!val) continue;
+        for(var t=0;t<tokens.length;t++){
+          var q = tokens[t];
+          if(q.length>=3 && val===q) return r;                     // 完全一致を最優先
+          if(!partial && q.length>=4 && val.indexOf(q)>=0) partial=r; // 予備で部分一致
+        }
+      }
     }
     return partial;
   }
