@@ -385,6 +385,9 @@ main{padding:0; background:var(--surface);}
 .welcome .steps{margin-top:30px; display:flex; flex-direction:column; gap:13px; width:100%; max-width:300px; text-align:left;}
 .welcome .step{display:flex; align-items:flex-start; gap:11px; font-size:13.5px; line-height:1.5; color:var(--ink-soft);}
 .welcome .step .sn{flex:0 0 auto; width:22px; height:22px; border-radius:50%; background:#e6efed; color:#1f6f63; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:1px;}
+/* footer: remove bottom gap, square buttons */
+#ftr{padding:10px 12px var(--safe-b);}
+#ftr .btn{border-radius:0;}
 </style>
 </head>
 <body>
@@ -437,8 +440,8 @@ main{padding:0; background:var(--surface);}
 <main id="list" style="display:none"></main>
 
 <footer id="ftr" style="display:none">
-  <button class="btn ghost" id="exportBtn" disabled>書き出し</button>
-  <button class="btn primary wide" id="saveMonthBtn" disabled>今月分を保存</button>
+  <button class="btn ghost" id="exportBtn" disabled>Excel出力</button>
+  <button class="btn primary wide" id="saveMonthBtn" disabled>保存</button>
 </footer>
 
 <div class="scrim" id="scrim">
@@ -1033,7 +1036,7 @@ main{padding:0; background:var(--surface);}
     var h=loadHistory();
     var html='<div class="hist-head"><h2>棚卸の履歴</h2><button class="x" data-act="close">閉じる</button></div>';
     if(!h.length){
-      html+='<p class="hist-empty">まだ保存された棚卸はありません。<br>棚卸を終えたら、下の「今月分を保存」で記録できます。<br><br>※記録はこの端末の中だけに残ります。大切な回はExcelにも書き出して保管してください。</p>';
+      html+='<p class="hist-empty">まだ保存された棚卸はありません。<br>棚卸を終えたら、下の「保存」で記録できます。<br><br>※記録はこの端末の中だけに残ります。大切な回はExcelにも書き出して保管してください。</p>';
     }else{
       html+=h.map(function(rec){
         return '<button class="rec-card" data-act="open" data-id="'+rec.id+'">'
